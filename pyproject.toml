@@ -1,0 +1,15 @@
+[project]
+name = "regexmatch"
+version = "0.0.0"
+description = "Template repo for Guardrails Hub validators."
+authors = [
+    {name = "Guardrails AI", email = "contact@guardrailsai.com"}
+]
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">= 3.8"
+dependencies = [
+    "rstr",
+    "guardrails-ai>=0.3.2",
+    "pydantic>=2.4.2"
+]
