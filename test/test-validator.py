@@ -1,19 +1,19 @@
 from guardrails import Guard
 from pydantic import BaseModel, Field
-from validator import RegexMatch
+from validator import PIIFilter
 
 
 class ValidatorTestObject(BaseModel):
     test_val: str = Field(
         validators=[
-            RegexMatch(regex="a.*", match_type="fullmatch", on_fail="exception")
+            PIIFilter(pii_entities="pii", on_fail="exception")
         ]
     )
 
 
 TEST_OUTPUT = """
 {
-  "test_val": "a test value"
+  "test_val": "My email address is , and my phone number is"
 }
 """
 
@@ -27,7 +27,7 @@ print("validated output: ", guarded_output)
 
 TEST_FAIL_OUTPUT = """
 {
-"test_val": "b test value"
+"test_val": "My email address is demo@lol.com, and my phone number is 1234567890"
 }
 """
 
