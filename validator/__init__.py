@@ -1,3 +1,3 @@
-from .main import PIIFilter
+from .main import DetectPII
 
-__all__ = ["PIIFilter"]
+__all__ = ["DetectPII"]

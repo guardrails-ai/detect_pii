@@ -16,8 +16,8 @@ except ImportError:
     AnonymizerEngine = None
 
 
-@register_validator(name="guardrails/pii", data_type="string")
-class PIIFilter(Validator):
+@register_validator(name="guardrails/detect_pii", data_type="string")
+class DetectPII(Validator):
     """Validates that any text does not contain any PII.
 
     This validator uses Microsoft's Presidio (https://github.com/microsoft/presidio)
@@ -26,11 +26,11 @@ class PIIFilter(Validator):
 
     **Key Properties**
 
-    | Property                      | Description                         |
-    | ----------------------------- | ----------------------------------- |
-    | Name for `format` attribute   | `pii`                               |
-    | Supported data types          | `string`                            |
-    | Programmatic fix              | Anonymized text with PII filtered   |
+    | Property                      | Description                             |
+    | ----------------------------- | --------------------------------------- |
+    | Name for `format` attribute   | `pii`                                   |
+    | Supported data types          | `string`                                |
+    | Programmatic fix              | Anonymized text with PII filtered out   |
 
     Args:
         pii_entities (str | List[str], optional): The PII entities to filter. Must be
@@ -102,7 +102,7 @@ class PIIFilter(Validator):
         pii_entities = metadata.get("pii_entities", self.pii_entities)
         if pii_entities is None:
             raise ValueError(
-                "`pii_entities` must be set in order to use the `PIIFilter` validator."
+                "`pii_entities` must be set in order to use the `DetectPII` validator."
                 "Add this: `pii_entities=['PERSON', 'PHONE_NUMBER']`"
                 "OR pii_entities='pii' or 'spi'"
                 "in init or metadata."

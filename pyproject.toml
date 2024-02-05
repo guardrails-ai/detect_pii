@@ -1,5 +1,5 @@
 [project]
-name = "pii_filter"
+name = "detect_pii"
 version = "0.0.0"
 description = "Validates that any text does not contain any PII."
 authors = [
@@ -12,5 +12,6 @@ dependencies = [
     "presidio-analyzer",
     "presidio_anonymizer",
     "guardrails-ai>=0.3.2",
-    "pydantic>=2.4.2"
+    "pydantic>=2.4.2",
+    "pytest>=8.0.0"
 ]
