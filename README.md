@@ -53,7 +53,7 @@ In this example, we apply the validator to a string field of a JSON output gener
 ```python
 # Import Guard and Validator
 from pydantic import BaseModel
-from guardrails.hub import ValidChoices
+from guardrails.hub import DetectPII
 from guardrails import Guard
 
 # Initialize Validator
@@ -83,5 +83,6 @@ guard.parse("""
 
 ## API Reference
 
+`__init__`
 - `pii_entities`: The types of PII entities to filter out. For a full list of entities look at https://microsoft.github.io/presidio/
  - `on_fail`: The policy to enact when a validator fails.
