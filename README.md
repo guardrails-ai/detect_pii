@@ -1,4 +1,4 @@
-## Details
+## Overview
 
 | Developed by | Guardrails AI |
 | --- | --- |
