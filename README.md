@@ -19,7 +19,7 @@ This validator ensures that any given text does not contain PII. This validator 
 ## Installation
 
 ```bash
-$ gudardrails hub install hub://guardrails/detect_pii
+$ guardrails hub install hub://guardrails/detect_pii
 ```
 
 ## Usage Examples
