@@ -14,7 +14,9 @@ This validator ensures that any given text does not contain PII. This validator 
 
 ### Resources required
 
-- Dependencies: `presidio_analyzer`, `presidio_anonymizer`
+* Dependencies:
+    - presidio-analyzer
+    - presidio-anonymizer
 
 ## Installation
 
@@ -31,19 +33,14 @@ $ guardrails hub install hub://guardrails/detect_pii
 from guardrails.hub import DetectPII
 from guardrails import Guard
 
-# Initialize Validator
-val = DetectPII(
-    pii_entities=["EMAIL_ADDRESS", "PHONE_NUMBER"],
-    on_fail="fix"
-)
 
 # Setup Guard
-guard = Guard.from_string(
-    validators=[val, ...],
+guard = Guard().use(
+    DetectPII, ["EMAIL_ADDRESS", "PHONE_NUMBER"], "fix"
 )
 
-guard.parse("Good morning!")  # Validator passes
-guard.parse("If interested, apply at not_a_real_email@guardrailsai.com")  # Validator fails
+guard.validate("Good morning!")  # Validator passes
+guard.validate("If interested, apply at not_a_real_email@guardrailsai.com")  # Validator fails
 ```
 
 ## Validating JSON output via Python
@@ -52,7 +49,7 @@ In this example, we apply the validator to a string field of a JSON output gener
 
 ```python
 # Import Guard and Validator
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from guardrails.hub import DetectPII
 from guardrails import Guard
 
@@ -83,21 +80,21 @@ guard.parse("""
 
 ## API Reference
 
-**`__init__(self, on_fail="noop")`**
+**`__init__(self, pii_entities, on_fail="noop")`**
 <ul>
 
 Initializes a new instance of the Validator class.
 
 **Parameters:**
 
-- **`pii_entities`** _(list(str))_: The types of PII entities to filter out. For a full list of entities look at https://microsoft.github.io/presidio/
+- **`pii_entities`** *(Union[str, List(str)])*: The types of PII entities to filter out. For a full list of entities look at https://microsoft.github.io/presidio/
 - **`on_fail`** *(str, Callable):* The policy to enact when a validator fails. If `str`, must be one of `reask`, `fix`, `filter`, `refrain`, `noop`, `exception` or `fix_reask`. Otherwise, must be a function that is called when the validator fails.
 
 </ul>
 
 <br/>
 
-**`__call__(self, value, metadata={}) → ValidationOutcome`**
+**`validate(self, value, metadata={}) → ValidationOutcome`**
 
 <ul>
 
