@@ -1,3 +1,6 @@
-print("post-install starting...")
-print("This is where you would do things like download nltk tokenizers or login to the HuggingFace hub...")
-print("post-install complete!")
+from presidio_analyzer import AnalyzerEngine
+from presidio_anonymizer import AnonymizerEngine
+
+# Download models
+AnalyzerEngine()
+AnonymizerEngine()
