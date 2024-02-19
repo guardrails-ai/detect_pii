@@ -7,13 +7,8 @@ from guardrails.validator_base import (
     Validator,
     register_validator,
 )
-
-try:
-    from presidio_analyzer import AnalyzerEngine
-    from presidio_anonymizer import AnonymizerEngine
-except ImportError:
-    AnalyzerEngine = None
-    AnonymizerEngine = None
+from presidio_analyzer import AnalyzerEngine
+from presidio_anonymizer import AnonymizerEngine
 
 
 @register_validator(name="guardrails/detect_pii", data_type="string")
@@ -68,13 +63,6 @@ class DetectPII(Validator):
         on_fail: Union[Callable[..., Any], None] = None,
         **kwargs,
     ):
-        if AnalyzerEngine is None or AnonymizerEngine is None:
-            raise ImportError(
-                "You must install the `presidio-analyzer`, `presidio-anonymizer`"
-                "and a spaCy language model to use the PII validator."
-                "Refer to https://microsoft.github.io/presidio/installation/"
-            )
-
         super().__init__(on_fail, pii_entities=pii_entities, **kwargs)
         self.pii_entities = pii_entities
         self.pii_analyzer = AnalyzerEngine()
