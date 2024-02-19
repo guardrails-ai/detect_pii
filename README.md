@@ -15,6 +15,7 @@ This validator ensures that any given text does not contain PII. This validator 
 ### Requirements
 
 * Dependencies:
+    - guardrails-ai>=0.4.0
     - presidio-analyzer
     - presidio-anonymizer
 
