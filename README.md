@@ -36,12 +36,20 @@ from guardrails import Guard
 
 
 # Setup Guard
-guard = Guard().use(
-    DetectPII, ["EMAIL_ADDRESS", "PHONE_NUMBER"], "fix"
-)
+guard = Guard().use(DetectPII, ["EMAIL_ADDRESS", "PHONE_NUMBER"], "exception")
 
 guard.validate("Good morning!")  # Validator passes
-guard.validate("If interested, apply at not_a_real_email@guardrailsai.com")  # Validator fails
+try:
+    guard.validate(
+        "If interested, apply at not_a_real_email@guardrailsai.com"
+    )  # Validator fails
+except Exception as e:
+    print(e)
+```
+Output:
+```
+Validation failed for field with errors: The following text in your response contains PII:
+If interested, apply at not_a_real_email@guardrailsai.com
 ```
 
 ### Validating JSON output via Python
@@ -55,28 +63,35 @@ from guardrails.hub import DetectPII
 from guardrails import Guard
 
 # Initialize Validator
-val = DetectPII(
-    pii_entities=["EMAIL_ADDRESS", "PHONE_NUMBER"],
-    on_fail="fix"
-)
+val = DetectPII(pii_entities=["EMAIL_ADDRESS", "PHONE_NUMBER"], on_fail="exception")
+
 
 # Create Pydantic BaseModel
 class UserHistory(BaseModel):
     name: str
-    last_msg: str = Field(
-        description="Last message sent by user", validators=[val]
-    )
+    last_msg: str = Field(description="Last message sent by user", validators=[val])
+
 
 # Create a Guard to check for valid Pydantic output
 guard = Guard.from_pydantic(output_class=UserHistory)
 
 # Run LLM output generating JSON through guard
-guard.parse("""
-{
-    "name": "John Smith",
-    "last_msg": "My account isn't working. My username is not_a_real_email@guardrailsai.com"
-}
-""")
+try:
+    guard.parse(
+        """
+    {
+        "name": "John Smith",
+        "last_msg": "My account isn't working. My username is not_a_real_email@guardrailsai.com"
+    }
+    """
+    )
+except Exception as e:
+    print(e)
+```
+Output:
+```
+Validation failed for field with errors: The following text in your response contains PII:
+My account isn't working. My username is not_a_real_email@guardrailsai.com
 ```
 
 # API Reference
