@@ -1,5 +1,4 @@
 from guardrails import Guard
-from pydantic import BaseModel, Field
 from validator import DetectPII
 
 

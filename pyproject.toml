@@ -7,11 +7,26 @@ authors = [
 ]
 license = {file = "LICENSE"}
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.8.1"
 dependencies = [
     "presidio-analyzer",
-    "presidio_anonymizer",
-    "guardrails-ai>=0.3.2",
-    "pydantic>=2.4.2",
-    "pytest>=8.0.0"
+    "presidio-anonymizer",
+    "guardrails-ai>=0.4.0"
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pyright",
+    "pytest",
+    "ruff"
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-rP"
+testpaths = [
+    "test"
+]
+
+[tool.pyright]
+include = ["validator"]
