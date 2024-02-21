@@ -47,7 +47,7 @@ except Exception as e:
     print(e)
 ```
 Output:
-```
+```console
 Validation failed for field with errors: The following text in your response contains PII:
 If interested, apply at not_a_real_email@guardrailsai.com
 ```
@@ -89,7 +89,7 @@ except Exception as e:
     print(e)
 ```
 Output:
-```
+```console
 Validation failed for field with errors: The following text in your response contains PII:
 My account isn't working. My username is not_a_real_email@guardrailsai.com
 ```
