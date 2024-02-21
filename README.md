@@ -95,7 +95,7 @@ Initializes a new instance of the Validator class.
 
 <br/>
 
-**`validate(self, value, metadata={}) → ValidationOutcome`**
+**`validate(self, value, metadata={}) → ValidationResult`**
 
 <ul>
 
