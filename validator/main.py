@@ -123,13 +123,14 @@ class DetectPII(Validator):
             return FailResult(
                 metadata=metadata,
                 violation="DetectPII",
-                error_msg={
-                    "match_string": test_string,
-                    "violation": "DetectPII",
-                    "error_msg": f"The following text in your response contains PII:\n{test_string}",
-                    "fix_value": None,
-                },
                 fix_value=None,
-                error_message=f"The following text in your response contains PII:\n{test_string}",
+                error_message=str(
+                    {
+                        "match_string": test_string,
+                        "violation": "DetectPII",
+                        "error_msg": f"The following text in your response contains PII:\n{test_string}",
+                        "fix_value": None,
+                    },
+                ),
             )
         return PassResult()
