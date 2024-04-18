@@ -110,17 +110,26 @@ class DetectPII(Validator):
                 f"`pii_entities` must be one of {pii_keys}" " or a list of strings."
             )
 
+        # split value into just the most recent string
+        original = value
+        test_string = value.split(" ")[-1]
         # Analyze the text, and anonymize it if there is PII
         anonymized_text = self.get_anonymized_text(
-            text=value, entities=entities_to_filter
+            text=test_string, entities=entities_to_filter
         )
 
         # If anonymized value text is different from original value, then there is PII
-        if anonymized_text != value:
+        if anonymized_text != test_string:
             return FailResult(
-                error_message=(
-                    f"The following text in your response contains PII:\n{value}"
-                ),
-                fix_value=anonymized_text,
+                metadata=metadata,
+                violation="DetectPII",
+                error_msg={
+                    "match_string": test_string,
+                    "violation": "DetectPII",
+                    "error_msg": f"The following text in your response contains PII:\n{test_string}",
+                    "fix_value": None,
+                },
+                fix_value=None,
+                error_message=f"The following text in your response contains PII:\n{test_string}",
             )
         return PassResult()
