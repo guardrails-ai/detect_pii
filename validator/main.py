@@ -115,6 +115,9 @@ class DetectPII(Validator):
         # split value into just the most recent string
         most_recent_sentence = nltk.sent_tokenize(value)[-1]
 
+        if not most_recent_sentence.endswith((".", "?", "!")):
+            return PassResult()
+
         # Analyze the text, and anonymize it if there is PII
         anonymized_text = self.get_anonymized_text(
             text=most_recent_sentence, entities=entities_to_filter
