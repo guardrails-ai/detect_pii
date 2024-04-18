@@ -1,6 +1,7 @@
 import json
 from typing import Any, Callable, Dict, List, Union, cast
 
+import nltk
 from guardrails.validator_base import (
     FailResult,
     PassResult,
@@ -112,24 +113,53 @@ class DetectPII(Validator):
             )
 
         # split value into just the most recent string
-        original = value
-        test_string = value.split(" ")[-1]
+        most_recent_sentence = nltk.sent_tokenize(value)[-1]
+
         # Analyze the text, and anonymize it if there is PII
         anonymized_text = self.get_anonymized_text(
-            text=test_string, entities=entities_to_filter
+            text=most_recent_sentence, entities=entities_to_filter
         )
 
         # If anonymized value text is different from original value, then there is PII
-        if anonymized_text != test_string:
+        if anonymized_text != most_recent_sentence:
+            anon_split = anonymized_text.split(" ")
+            normal_split = most_recent_sentence.split(" ")
+            filtered_recent_sentence = most_recent_sentence
+            # for i in range(len(anonymized_text.split(" "))):
+            #     anonymized = anonymized_text[i]
+            #     normal = most_recent_sentence[i]
+            #     if anonymized != normal
+            anon = 0
+            normal = 0
+
+            sensitive_tokens = []
+            while anon < len(anon_split):
+                if anon_split[anon] == normal_split[normal]:
+                    anon += 1
+                    normal += 1
+                    continue
+                else:
+                    anon += 1
+                    collect = []
+                    if anon >= len(anon_split):
+                        collect = normal_split[normal:]
+                    else:
+                        next_word = anon_split[anon]
+                        while normal_split[normal] != next_word:
+                            collect.append(normal_split[normal])
+                            normal += 1
+                    collect = " ".join(collect)
+                    sensitive_tokens.append(collect)
+
             return FailResult(
                 metadata=metadata,
                 violation="DetectPII",
                 fix_value=None,
                 error_message=json.dumps(
                     {
-                        "match_string": test_string,
+                        "match_string": sensitive_tokens,
                         "violation": "DetectPII",
-                        "error_msg": f"The following text in your response contains PII:\n{test_string}",
+                        "error_msg": "This text contains PII",
                         "fix_value": None,
                     },
                 ),
