@@ -1,3 +1,4 @@
+import json
 from typing import Any, Callable, Dict, List, Union, cast
 
 from guardrails.validator_base import (
@@ -124,7 +125,7 @@ class DetectPII(Validator):
                 metadata=metadata,
                 violation="DetectPII",
                 fix_value=None,
-                error_message=str(
+                error_message=json.dumps(
                     {
                         "match_string": test_string,
                         "violation": "DetectPII",
