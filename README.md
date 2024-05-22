@@ -36,7 +36,9 @@ from guardrails import Guard
 
 
 # Setup Guard
-guard = Guard().use(DetectPII, ["EMAIL_ADDRESS", "PHONE_NUMBER"], "exception")
+guard = Guard().use(
+    DetectPII, ["EMAIL_ADDRESS", "PHONE_NUMBER"], "exception"
+)
 
 guard.validate("Good morning!")  # Validator passes
 try:
@@ -106,7 +108,7 @@ Initializes a new instance of the Validator class.
 </ul>
 <br/>
 
-**`validate(self, value, metadata={}) → ValidationResult`**
+**`validate(self, value, metadata={}) -> ValidationResult`**
 <ul>
 Validates the given `value` using the rules defined in this validator, relying on the `metadata` provided to customize the validation process. This method is automatically invoked by `guard.parse(...)`, ensuring the validation logic is applied to the input data.
 
