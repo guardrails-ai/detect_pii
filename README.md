@@ -124,5 +124,5 @@ Note:
     
     | Key | Type | Description | Default |
     | --- | --- | --- | --- |
-    | `pii_entities` | list(str) | The types of PII entities to filter out. For a full list of entities look at https://microsoft.github.io/presidio/. When `pii_entities` are provided in `metadata`, it overrides the `pii_entities` set during validator initialization. | N/A |
+    | `pii_entities` | Union[str, list(str)] | The types of PII entities to filter out. For a full list of entities look at https://microsoft.github.io/presidio/. When `pii_entities` are provided in `metadata`, it overrides the `pii_entities` set during validator initialization. | N/A |
 </ul>
