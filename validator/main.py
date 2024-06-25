@@ -7,6 +7,7 @@ from guardrails.validator_base import (
     Validator,
     register_validator,
 )
+from guardrails.validator_base import ErrorSpan
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
@@ -117,10 +118,11 @@ class DetectPII(Validator):
 
         # If anonymized value text is different from original value, then there is PII
         if anonymized_text != value:
+            error_msg=f"The following text in your response contains PII:\n{value}"
             return FailResult(
-                error_message=(
-                    f"The following text in your response contains PII:\n{value}"
+                error_message=(error_msg
                 ),
                 fix_value=anonymized_text,
+                error_spans=[ErrorSpan(start=0,end=len(value),reason=error_msg)]
             )
         return PassResult()
