@@ -1,4 +1,6 @@
 from typing import Any, Callable, Dict, List, Union, cast
+import difflib
+import nltk
 
 from guardrails.validator_base import (
     FailResult,
@@ -58,6 +60,32 @@ class DetectPII(Validator):
         ],
     }
 
+    def chunking_function(self, chunk: str):
+        """
+        Use a sentence tokenizer to split the chunk into sentences.
+
+        Because using the tokenizer is expensive, we only use it if there
+        is a period present in the chunk.
+        """
+        # using the sentence tokenizer is expensive
+        # we check for a . to avoid wastefully calling the tokenizer
+        if "." not in chunk:
+            return []
+        sentences = nltk.sent_tokenize(chunk)
+        if len(sentences) == 0:
+            return []
+        if len(sentences) == 1:
+            sentence = sentences[0].strip()
+            # this can still fail if the last chunk ends on the . in an email address
+            if sentence[-1] == ".":
+                return [sentence, ""]
+            else:
+                return []
+
+        # return the sentence
+        # then the remaining chunks that aren't finished accumulating
+        return [sentences[0], "".join(sentences[1:])]
+
     def __init__(
         self,
         pii_entities: Union[str, List[str], None] = None,
@@ -115,14 +143,42 @@ class DetectPII(Validator):
         anonymized_text = self.get_anonymized_text(
             text=value, entities=entities_to_filter
         )
+        if anonymized_text == value:
+            return PassResult()
+
+        # TODO: this should be refactored into a helper method in OSS
+        # get character indices of differences between two strings
+        differ = difflib.Differ()
+        diffs = list(differ.compare(value, anonymized_text))
+        start_range = None
+        diff_ranges=[]
+        # needs to be tracked separately
+        curr_index_in_original = 0
+        for i in range(len(diffs)):
+            if start_range is not None and diffs[i][0] != '-':
+                diff_ranges.append((start_range, curr_index_in_original))
+                start_range = None
+            if diffs[i][0] == '-':
+                if start_range is None:
+                    start_range = curr_index_in_original
+            if diffs[i][0] != '+':
+                curr_index_in_original += 1
+
+        error_spans = []
+        for diff_range in diff_ranges:
+            error_spans.append(
+                ErrorSpan(
+                    start=diff_range[0], 
+                    end=diff_range[1], 
+                    reason=f"PII detected in {value[diff_range[0]:diff_range[1]]}"
+                )
+            )
 
         # If anonymized value text is different from original value, then there is PII
-        if anonymized_text != value:
-            error_msg=f"The following text in your response contains PII:\n{value}"
-            return FailResult(
-                error_message=(error_msg
-                ),
-                fix_value=anonymized_text,
-                error_spans=[ErrorSpan(start=0,end=len(value),reason=error_msg)]
-            )
-        return PassResult()
+        error_msg=f"The following text in your response contains PII:\n{value}"
+        return FailResult(
+            error_message=(error_msg
+            ),
+            fix_value=anonymized_text,
+            error_spans=error_spans
+        )
