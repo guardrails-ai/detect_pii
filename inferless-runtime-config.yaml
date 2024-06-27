@@ -1,0 +1,4 @@
+build:
+  system_packages:
+  python_packages:
+    - "presidio_analyzer"

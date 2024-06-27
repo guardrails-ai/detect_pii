@@ -1,0 +1,38 @@
+# Inferless config file (version: 1.0.0)
+version: 1.0.0
+
+name: DETECT_PII
+import_source: LOCAL
+
+# you can choose the options between ONNX, TENSORFLOW, PYTORCH
+source_framework_type: PYTORCH
+
+configuration:
+  # if you want to use a custom runtime, add the runtime id below.
+  # you can find it by running `inferless runtime list` or create one with `inferless runtime upload` and update this file it by running `inferless runtime select --id <RUNTIME_ID>`.
+  custom_runtime_id: ef3d357b-df6a-41c1-b4d5-b2eaac6e0bad
+  custom_runtime_version: '0'
+
+  # if you want to use a custom volume, add the volume id and name below,
+  # you can find it by running `inferless volume list` or create one with `inferless volume create -n {VOLUME_NAME}`
+  custom_volume_id: ''
+  custom_volume_name: ''
+
+  gpu_type: T4
+  inference_time: '3'
+  is_dedicated: false
+  is_serverless: false
+  max_replica: '1'
+  min_replica: '0'
+  scale_down_delay: '600'
+  region: region-1
+  vcpu: '1.5'
+  ram: '7'
+env:
+  # Add your environment variables here
+  # ENV: 'PROD'
+secrets:
+  # Add your secret ids here you can find it by running `inferless secrets list`
+  # - 65723205-ce21-4392-a10b-3tf00c58988c
+
+io_schema: true
