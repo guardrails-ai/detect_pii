@@ -10,7 +10,7 @@ class InferlessPythonModel:
         self.pii_analyzer = AnalyzerEngine()
         self.pii_anonymizer = AnonymizerEngine()
 
-    def infer(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def infer(self, inputs: Dict[str, Any]):
         results = self.pii_analyzer.analyze(
             text=inputs["text"], entities=inputs["entities"], language="en"
         )
