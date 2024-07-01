@@ -132,7 +132,7 @@ class DetectPII(Validator):
             )
 
         # Analyze the text, and anonymize it if there is PII
-        anonymized_text = self.get_anonymized_text(
+        anonymized_text = self._inference(
             text=value, entities=entities_to_filter
         )
         if anonymized_text == value:
