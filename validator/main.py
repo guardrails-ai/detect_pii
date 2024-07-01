@@ -91,13 +91,11 @@ class DetectPII(Validator):
     def __init__(
         self,
         pii_entities: Union[str, List[str], None] = None,
-        use_local: bool = False,
         on_fail: Union[Callable[..., Any], None] = None,
         **kwargs,
     ):
         super().__init__(
             pii_entities=pii_entities, 
-            use_local=use_local, 
             on_fail=on_fail, 
             **kwargs,
         )
