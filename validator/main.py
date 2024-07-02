@@ -99,12 +99,9 @@ class DetectPII(Validator):
             on_fail=on_fail, 
             **kwargs,
         )
-        self.use_local = kwargs.get("use_local", None)
-        self.validation_endpoint = kwargs.get("validation_endpoint", None)
         self.pii_entities = pii_entities
-        if self.use_local:
-            self.pii_analyzer = AnalyzerEngine()
-            self.pii_anonymizer = AnonymizerEngine()
+        self.pii_analyzer = AnalyzerEngine()
+        self.pii_anonymizer = AnonymizerEngine()
 
     def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
         # Entities to filter passed through metadata take precedence
