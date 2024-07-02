@@ -191,4 +191,4 @@ class DetectPII(Validator):
         request_body = model_input
         request_body = json.dumps(request_body)
         response = self._hub_inference_request(request_body)
-        return response["data"]
+        return response["outputs"][0]["data"][0]
