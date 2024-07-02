@@ -14,6 +14,7 @@ from guardrails.validator_base import (
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
+
 @register_validator(
     name="guardrails/detect_pii", data_type="string", has_guardrails_endpoint=True
 )
@@ -95,8 +96,8 @@ class DetectPII(Validator):
         **kwargs,
     ):
         super().__init__(
-            pii_entities=pii_entities, 
-            on_fail=on_fail, 
+            pii_entities=pii_entities,
+            on_fail=on_fail,
             **kwargs,
         )
         self.pii_entities = pii_entities
@@ -130,7 +131,7 @@ class DetectPII(Validator):
 
         # Analyze the text, and anonymize it if there is PII
         anonymized_text = self._inference(
-            text=value, entities=entities_to_filter
+            {"text": value, "entities": entities_to_filter}
         )
         if anonymized_text == value:
             return PassResult()
