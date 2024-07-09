@@ -9,7 +9,7 @@ from guardrails.validator_base import (
     Validator,
     register_validator,
 )
-# from guardrails.validator_base import ErrorSpan
+from guardrails.validator_base import ErrorSpan
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
@@ -164,15 +164,15 @@ class DetectPII(Validator):
             if diffs[i][0] != '+':
                 curr_index_in_original += 1
 
-        # error_spans = []
-        # for diff_range in diff_ranges:
-        #     error_spans.append(
-        #         ErrorSpan(
-        #             start=diff_range[0], 
-        #             end=diff_range[1], 
-        #             reason=f"PII detected in {value[diff_range[0]:diff_range[1]]}"
-        #         )
-        #     )
+        error_spans = []
+        for diff_range in diff_ranges:
+            error_spans.append(
+                ErrorSpan(
+                    start=diff_range[0], 
+                    end=diff_range[1], 
+                    reason=f"PII detected in {value[diff_range[0]:diff_range[1]]}"
+                )
+            )
 
         # If anonymized value text is different from original value, then there is PII
         error_msg=f"The following text in your response contains PII:\n{value}"
@@ -180,5 +180,5 @@ class DetectPII(Validator):
             error_message=(error_msg
             ),
             fix_value=anonymized_text,
-            # error_spans=error_spans
+            error_spans=error_spans
         )
