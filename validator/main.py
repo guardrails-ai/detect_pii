@@ -187,10 +187,20 @@ class DetectPII(Validator):
     def _inference_remote(self, model_input: Any) -> Any:
         """Remote inference method for a hosted ML endpoint"""
         request_body = {
-            "model_name": "detect_pii",
-            "text": model_input["text"],
-            "entities": model_input["entities"]
+            "inputs": [
+                {
+                    "name": "text",
+                    "shape": [1],
+                    "data": [model_input["text"]],
+                    "datatype": "BYTES"
+                },
+                {
+                    "name": "entities",
+                    "shape": [len(model_input["entities"])],
+                    "data": model_input["entities"],
+                    "datatype": "BYTES"
+                }
+            ]
         }
-        request_body = json.dumps(request_body)
-        response = self._hub_inference_request(request_body, self.validation_endpoint)
+        response = self._hub_inference_request(json.dumps(request_body), self.validation_endpoint)
         return response["outputs"][0]["data"][0]
