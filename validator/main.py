@@ -169,7 +169,7 @@ class DetectPII(Validator):
                 ErrorSpan(
                     start=diff_range[0],
                     end=diff_range[1],
-                    reason=f"PII detected in {value[diff_range[0]:diff_range[1]]}"
+                    reason=f"PII detected in {value[diff_range[0]:diff_range[1]]}",
                 )
             )
 
