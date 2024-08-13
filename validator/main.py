@@ -167,8 +167,8 @@ class DetectPII(Validator):
         for diff_range in diff_ranges:
             error_spans.append(
                 ErrorSpan(
-                    start=diff_range[0], 
-                    end=diff_range[1], 
+                    start=diff_range[0],
+                    end=diff_range[1],
                     reason=f"PII detected in {value[diff_range[0]:diff_range[1]]}"
                 )
             )
