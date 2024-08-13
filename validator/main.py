@@ -150,17 +150,17 @@ class DetectPII(Validator):
         differ = difflib.Differ()
         diffs = list(differ.compare(value, anonymized_text))
         start_range = None
-        diff_ranges=[]
+        diff_ranges = []
         # needs to be tracked separately
         curr_index_in_original = 0
         for i in range(len(diffs)):
-            if start_range is not None and diffs[i][0] != '-':
+            if start_range is not None and diffs[i][0] != "-":
                 diff_ranges.append((start_range, curr_index_in_original))
                 start_range = None
-            if diffs[i][0] == '-':
+            if diffs[i][0] == "-":
                 if start_range is None:
                     start_range = curr_index_in_original
-            if diffs[i][0] != '+':
+            if diffs[i][0] != "+":
                 curr_index_in_original += 1
 
         error_spans = []
