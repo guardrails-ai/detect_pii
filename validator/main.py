@@ -1,23 +1,20 @@
-import difflib
-import json
 from typing import Any, Callable, Dict, List, Union, cast
-
+import difflib
 import nltk
+
 from guardrails.validator_base import (
-    ErrorSpan,
     FailResult,
     PassResult,
     ValidationResult,
     Validator,
     register_validator,
 )
+from guardrails.validator_base import ErrorSpan
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
 
-@register_validator(
-    name="guardrails/detect_pii", data_type="string", has_guardrails_endpoint=True
-)
+@register_validator(name="guardrails/detect_pii", data_type="string")
 class DetectPII(Validator):
     """Validates that any text does not contain any PII.
 
@@ -93,18 +90,28 @@ class DetectPII(Validator):
         self,
         pii_entities: Union[str, List[str], None] = None,
         on_fail: Union[Callable[..., Any], None] = None,
-        **kwargs,
     ):
-        super().__init__(
-            pii_entities=pii_entities,
-            on_fail=on_fail,
-            **kwargs,
-        )
+        super().__init__(on_fail, pii_entities=pii_entities)
         self.pii_entities = pii_entities
-        
-        if self.use_local:
-            self.pii_analyzer = AnalyzerEngine()
-            self.pii_anonymizer = AnonymizerEngine()
+        self.pii_analyzer = AnalyzerEngine()
+        self.pii_anonymizer = AnonymizerEngine()
+
+    def get_anonymized_text(self, text: str, entities: List[str]) -> str:
+        """Analyze and anonymize the text for PII.
+
+        Args:
+            text (str): The text to analyze.
+            pii_entities (List[str]): The PII entities to filter.
+
+        Returns:
+            anonymized_text (str): The anonymized text.
+        """
+        results = self.pii_analyzer.analyze(text=text, entities=entities, language="en")
+        results = cast(List[Any], results)
+        anonymized_text = self.pii_anonymizer.anonymize(
+            text=text, analyzer_results=results
+        ).text
+        return anonymized_text
 
     def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
         # Entities to filter passed through metadata take precedence
@@ -132,8 +139,8 @@ class DetectPII(Validator):
             )
 
         # Analyze the text, and anonymize it if there is PII
-        anonymized_text = self._inference(
-            {"text": value, "entities": entities_to_filter}
+        anonymized_text = self.get_anonymized_text(
+            text=value, entities=entities_to_filter
         )
         if anonymized_text == value:
             return PassResult()
@@ -143,66 +150,67 @@ class DetectPII(Validator):
         differ = difflib.Differ()
         diffs = list(differ.compare(value, anonymized_text))
         start_range = None
-        diff_ranges = []
+        diff_ranges=[]
         # needs to be tracked separately
         curr_index_in_original = 0
         for i in range(len(diffs)):
-            if start_range is not None and diffs[i][0] != "-":
+            if start_range is not None and diffs[i][0] != '-':
                 diff_ranges.append((start_range, curr_index_in_original))
                 start_range = None
-            if diffs[i][0] == "-":
+            if diffs[i][0] == '-':
                 if start_range is None:
                     start_range = curr_index_in_original
-            if diffs[i][0] != "+":
+            if diffs[i][0] != '+':
                 curr_index_in_original += 1
 
         error_spans = []
         for diff_range in diff_ranges:
             error_spans.append(
                 ErrorSpan(
-                    start=diff_range[0],
-                    end=diff_range[1],
-                    reason=f"PII detected in {value[diff_range[0]:diff_range[1]]}",
+                    start=diff_range[0], 
+                    end=diff_range[1], 
+                    reason=f"PII detected in {value[diff_range[0]:diff_range[1]]}"
                 )
             )
 
         # If anonymized value text is different from original value, then there is PII
-        error_msg = f"The following text in your response contains PII:\n{value}"
+        error_msg=f"The following text in your response contains PII:\n{value}"
         return FailResult(
-            error_message=(error_msg),
+            error_message=(error_msg
+            ),
             fix_value=anonymized_text,
-            error_spans=error_spans,
+            error_spans=error_spans
         )
 
-    def _inference_local(self, model_input: Any) -> Any:
-        """Local inference method running the PII analyzer and anonymizer locally."""
+    # def _inference_local(self, model_input: Any) -> Any:
+    #     """Local inference method running the PII analyzer and anonymizer locally."""
 
-        results = self.pii_analyzer.analyze(
-            text=model_input["text"], entities=model_input["entities"], language="en"
-        )
-        results = cast(List[Any], results)
-        anonymized_text = self.pii_anonymizer.anonymize(
-            text=model_input["text"], analyzer_results=results
-        ).text
-        return anonymized_text
+    #     results = self.pii_analyzer.analyze(
+    #         text=model_input["text"], entities=model_input["entities"], language="en"
+    #     )
+    #     results = cast(List[Any], results)
+    #     anonymized_text = self.pii_anonymizer.anonymize(
+    #         text=model_input["text"], analyzer_results=results
+    #     ).text
+    #     return anonymized_text
 
-    def _inference_remote(self, model_input: Any) -> Any:
-        """Remote inference method for a hosted ML endpoint"""
-        request_body = {
-            "inputs": [
-                {
-                    "name": "text",
-                    "shape": [1],
-                    "data": [model_input["text"]],
-                    "datatype": "BYTES"
-                },
-                {
-                    "name": "entities",
-                    "shape": [len(model_input["entities"])],
-                    "data": model_input["entities"],
-                    "datatype": "BYTES"
-                }
-            ]
-        }
-        response = self._hub_inference_request(json.dumps(request_body), self.validation_endpoint)
-        return response["outputs"][0]["data"][0]
+    # def _inference_remote(self, model_input: Any) -> Any:
+    #     """Remote inference method for a hosted ML endpoint"""
+    #     request_body = {
+    #         "inputs": [
+    #             {
+    #                 "name": "text",
+    #                 "shape": [1],
+    #                 "data": [model_input["text"]],
+    #                 "datatype": "BYTES"
+    #             },
+    #             {
+    #                 "name": "entities",
+    #                 "shape": [len(model_input["entities"])],
+    #                 "data": model_input["entities"],
+    #                 "datatype": "BYTES"
+    #             }
+    #         ]
+    #     }
+    #     response = self._hub_inference_request(json.dumps(request_body), self.validation_endpoint)
+    #     return response["outputs"][0]["data"][0]
