@@ -1,27 +1,64 @@
-from typing import Any, Dict, List, cast
-
-
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Union
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
+app = FastAPI()
 
-class InferlessPythonModel:
-    def initialize(self):
-        self.pii_analyzer = AnalyzerEngine()
-        self.pii_anonymizer = AnonymizerEngine()
+# Initialize the Presidio Analyzer and Anonymizer engines
+analyzer = AnalyzerEngine()
+anonymizer = AnonymizerEngine()
 
-    def infer(self, inputs: Dict[str, Any]):
-        entities_to_use = inputs["entities"]
-        if isinstance(entities_to_use, str):
-            entities_to_use = [entities_to_use]
-        results = self.pii_analyzer.analyze(
-            text=inputs["text"], entities=entities_to_use, language="en"
-        )
-        results = cast(List[Any], results)
-        anonymized_text = self.pii_anonymizer.anonymize(
-            text=inputs["text"], analyzer_results=results
-        ).text
-        return anonymized_text
+class InferenceData(BaseModel):
+    name: str
+    shape: List[int]
+    data: Union[List[str], List[float]]
+    datatype: str
 
-    def finalize(self):
-        pass
+class InputRequest(BaseModel):
+    inputs: List[InferenceData]
+
+class OutputResponse(BaseModel):
+    modelname: str
+    modelversion: str
+    outputs: List[InferenceData]
+
+@app.post("/validate", response_model=OutputResponse)
+async def detect_pii(input_request: InputRequest):
+    text = None
+    entities = None
+    
+    for inp in input_request.inputs:
+        if inp.name == "text":
+            text = inp.data[0]
+        elif inp.name == "entities":
+            entities = inp.data
+    
+    if text is None or entities is None:
+        raise HTTPException(status_code=400, detail="Invalid input format")
+
+    # Analyze the text to detect PII and anonymize it
+    if isinstance(entities, str):
+        entities = [entities]
+    results = analyzer.analyze(text=text, entities=entities, language="en")
+    anonymized_text = anonymizer.anonymize(text=text, analyzer_results=results).text
+    
+    output_data = OutputResponse(
+        modelname="DetectPIIModel",
+        modelversion="1",
+        outputs=[
+            InferenceData(
+                name="result",
+                datatype="BYTES",
+                shape=[1],
+                data=[anonymized_text]
+            )
+        ]
+    )
+    
+    print(f"Output data: {output_data}")
+    return output_data
+
+# Run the app with uvicorn
+# Save this script as app.py and run with: uvicorn app:app --reload
