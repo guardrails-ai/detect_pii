@@ -1,21 +1,23 @@
-from typing import Any, Callable, Dict, List, Union, cast
 import difflib
 import json
-import nltk
+from typing import Any, Callable, Dict, List, Union, cast
 
+import nltk
 from guardrails.validator_base import (
+    ErrorSpan,
     FailResult,
     PassResult,
     ValidationResult,
     Validator,
     register_validator,
 )
-from guardrails.validator_base import ErrorSpan
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
 
-@register_validator(name="guardrails/detect_pii", data_type="string")
+@register_validator(
+    name="guardrails/detect_pii", data_type="string", has_guardrails_endpoint=True
+)
 class DetectPII(Validator):
     """Validates that any text does not contain any PII.
 
@@ -91,28 +93,18 @@ class DetectPII(Validator):
         self,
         pii_entities: Union[str, List[str], None] = None,
         on_fail: Union[Callable[..., Any], None] = None,
+        **kwargs,
     ):
-        super().__init__(on_fail, pii_entities=pii_entities)
+        super().__init__(
+            pii_entities=pii_entities,
+            on_fail=on_fail,
+            **kwargs,
+        )
         self.pii_entities = pii_entities
-        self.pii_analyzer = AnalyzerEngine()
-        self.pii_anonymizer = AnonymizerEngine()
-
-    def get_anonymized_text(self, text: str, entities: List[str]) -> str:
-        """Analyze and anonymize the text for PII.
-
-        Args:
-            text (str): The text to analyze.
-            pii_entities (List[str]): The PII entities to filter.
-
-        Returns:
-            anonymized_text (str): The anonymized text.
-        """
-        results = self.pii_analyzer.analyze(text=text, entities=entities, language="en")
-        results = cast(List[Any], results)
-        anonymized_text = self.pii_anonymizer.anonymize(
-            text=text, analyzer_results=results
-        ).text
-        return anonymized_text
+        
+        if self.use_local:
+            self.pii_analyzer = AnalyzerEngine()
+            self.pii_anonymizer = AnonymizerEngine()
 
     def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
         # Entities to filter passed through metadata take precedence
@@ -140,8 +132,8 @@ class DetectPII(Validator):
             )
 
         # Analyze the text, and anonymize it if there is PII
-        anonymized_text = self.get_anonymized_text(
-            text=value, entities=entities_to_filter
+        anonymized_text = self._inference(
+            {"text": value, "entities": entities_to_filter}
         )
         if anonymized_text == value:
             return PassResult()
@@ -175,12 +167,11 @@ class DetectPII(Validator):
             )
 
         # If anonymized value text is different from original value, then there is PII
-        error_msg=f"The following text in your response contains PII:\n{value}"
+        error_msg = f"The following text in your response contains PII:\n{value}"
         return FailResult(
-            error_message=(error_msg
-            ),
+            error_message=(error_msg),
             fix_value=anonymized_text,
-            error_spans=error_spans
+            error_spans=error_spans,
         )
 
     def _inference_local(self, model_input: Any) -> Any:
@@ -213,6 +204,5 @@ class DetectPII(Validator):
                 }
             ]
         }
-        print(json.dumps(request_body))
         response = self._hub_inference_request(json.dumps(request_body), self.validation_endpoint)
         return response["outputs"][0]["data"][0]
