@@ -3,13 +3,38 @@ from pydantic import BaseModel
 from typing import List, Union
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
-import os
 
 app = FastAPI()
 
-# Initialize the Presidio model once
+# Initialize the Presidio models
 pii_analyzer = AnalyzerEngine()
 pii_anonymizer = AnonymizerEngine()
+
+# Define PII entities map
+PII_ENTITIES_MAP = {
+    "pii": [
+        "EMAIL_ADDRESS",
+        "PHONE_NUMBER",
+        "DOMAIN_NAME",
+        "IP_ADDRESS",
+        "DATE_TIME",
+        "LOCATION",
+        "PERSON",
+        "URL",
+    ],
+    "spi": [
+        "CREDIT_CARD",
+        "CRYPTO",
+        "IBAN_CODE",
+        "NRP",
+        "MEDICAL_LICENSE",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE",
+        "US_ITIN",
+        "US_PASSPORT",
+        "US_SSN",
+    ],
+}
 
 class InferenceData(BaseModel):
     name: str
@@ -43,7 +68,16 @@ async def check_pii(input_request: InputRequest):
     if text_vals is None or pii_entities is None:
         raise HTTPException(status_code=400, detail="Invalid input format")
 
-    return DetectPII.infer(text_vals, pii_entities)
+    if isinstance(pii_entities, str):
+        entities_to_filter = PII_ENTITIES_MAP.get(pii_entities)
+        if entities_to_filter is None:
+            raise HTTPException(status_code=400, detail="Invalid PII entity type")
+    elif isinstance(pii_entities, list):
+        entities_to_filter = pii_entities
+    else:
+        raise HTTPException(status_code=400, detail="Invalid PII entity format")
+
+    return DetectPII.infer(text_vals, entities_to_filter)
 
 class DetectPII:
     model_name = "presidio-pii"
