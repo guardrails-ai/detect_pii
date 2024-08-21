@@ -6,10 +6,6 @@ from presidio_anonymizer import AnonymizerEngine
 
 app = FastAPI()
 
-# Initialize the Presidio models
-pii_analyzer = AnalyzerEngine()
-pii_anonymizer = AnonymizerEngine()
-
 # Define PII entities map
 PII_ENTITIES_MAP = {
     "pii": [
@@ -77,17 +73,20 @@ async def check_pii(input_request: InputRequest):
     else:
         raise HTTPException(status_code=400, detail="Invalid PII entity format")
 
-    return DetectPII.infer(text_vals, entities_to_filter)
+    return DetectPII().infer(text_vals, entities_to_filter)
 
 class DetectPII:
     model_name = "presidio-pii"
     validation_method = "sentence"
 
-    @staticmethod
-    def infer(text_vals: List[str], entities: List[str]) -> OutputResponse:
+    def __init__(self):
+        self.pii_analyzer = AnalyzerEngine()
+        self.pii_anonymizer = AnonymizerEngine()
+
+    def infer(self, text_vals: List[str], entities: List[str]) -> OutputResponse:
         outputs = []
         for idx, text in enumerate(text_vals):
-            anonymized_text = DetectPII.get_anonymized_text(text, entities)
+            anonymized_text = self.get_anonymized_text(text, entities)
             results = anonymized_text if anonymized_text != text else []
 
             outputs.append(
@@ -105,10 +104,9 @@ class DetectPII:
             outputs=outputs
         )
 
-    @staticmethod
-    def get_anonymized_text(text: str, entities: List[str]) -> str:
-        results = pii_analyzer.analyze(text=text, entities=entities, language="en")
-        anonymized_text = pii_anonymizer.anonymize(
+    def get_anonymized_text(self, text: str, entities: List[str]) -> str:
+        results = self.pii_analyzer.analyze(text=text, entities=entities, language="en")
+        anonymized_text = self.pii_anonymizer.anonymize(
             text=text, analyzer_results=results
         ).text
         return anonymized_text
