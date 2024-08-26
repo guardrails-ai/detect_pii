@@ -91,8 +91,13 @@ class DetectPII(Validator):
         self,
         pii_entities: Union[str, List[str], None] = None,
         on_fail: Union[Callable[..., Any], None] = None,
+        **kwargs,
     ):
-        super().__init__(on_fail, pii_entities=pii_entities)
+        super().__init__(
+            on_fail, 
+            pii_entities=pii_entities, 
+            **kwargs,
+        )
         self.pii_entities = pii_entities
         self.pii_analyzer = AnalyzerEngine()
         self.pii_anonymizer = AnonymizerEngine()
@@ -140,8 +145,8 @@ class DetectPII(Validator):
             )
 
         # Analyze the text, and anonymize it if there is PII
-        anonymized_text = self._inference(
-            text=value, entities=entities_to_filter
+        anonymized_text = self.inference(
+            {"text": value, "entities": entities_to_filter}
         )
         if anonymized_text == value:
             return PassResult()
