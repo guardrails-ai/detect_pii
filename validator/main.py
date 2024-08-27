@@ -211,7 +211,7 @@ class DetectPII(Validator):
                     "datatype": "BYTES"
                 },
                 {
-                    "name": "entities",
+                    "name": "pii_entities",
                     "shape": [len(model_input["entities"])],
                     "data": model_input["entities"],
                     "datatype": "BYTES"
