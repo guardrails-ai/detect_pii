@@ -1,7 +1,6 @@
 from typing import Any, Callable, Dict, List, Union, cast
 import difflib
 import nltk
-import json
 
 from guardrails.validator_base import (
     FailResult,
@@ -15,7 +14,7 @@ from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
 
-@register_validator(name="guardrails/detect_pii", data_type="string", has_guardrails_endpoint=True)
+@register_validator(name="guardrails/detect_pii", data_type="string")
 class DetectPII(Validator):
     """Validates that any text does not contain any PII.
 
@@ -91,13 +90,8 @@ class DetectPII(Validator):
         self,
         pii_entities: Union[str, List[str], None] = None,
         on_fail: Union[Callable[..., Any], None] = None,
-        **kwargs,
     ):
-        super().__init__(
-            on_fail, 
-            pii_entities=pii_entities, 
-            **kwargs,
-        )
+        super().__init__(on_fail, pii_entities=pii_entities)
         self.pii_entities = pii_entities
         self.pii_analyzer = AnalyzerEngine()
         self.pii_anonymizer = AnonymizerEngine()
@@ -145,8 +139,8 @@ class DetectPII(Validator):
             )
 
         # Analyze the text, and anonymize it if there is PII
-        anonymized_text = self._inference(
-            {"text": value, "entities": entities_to_filter}
+        anonymized_text = self.get_anonymized_text(
+            text=value, entities=entities_to_filter
         )
         if anonymized_text == value:
             return PassResult()
@@ -188,35 +182,35 @@ class DetectPII(Validator):
             error_spans=error_spans
         )
 
-    def _inference_local(self, model_input: Any) -> Any:
-        """Local inference method running the PII analyzer and anonymizer locally."""
+    # def _inference_local(self, model_input: Any) -> Any:
+    #     """Local inference method running the PII analyzer and anonymizer locally."""
 
-        results = self.pii_analyzer.analyze(
-            text=model_input["text"], entities=model_input["entities"], language="en"
-        )
-        results = cast(List[Any], results)
-        anonymized_text = self.pii_anonymizer.anonymize(
-            text=model_input["text"], analyzer_results=results
-        ).text
-        return anonymized_text
+    #     results = self.pii_analyzer.analyze(
+    #         text=model_input["text"], entities=model_input["entities"], language="en"
+    #     )
+    #     results = cast(List[Any], results)
+    #     anonymized_text = self.pii_anonymizer.anonymize(
+    #         text=model_input["text"], analyzer_results=results
+    #     ).text
+    #     return anonymized_text
 
-    def _inference_remote(self, model_input: Any) -> Any:
-        """Remote inference method for a hosted ML endpoint"""
-        request_body = {
-            "inputs": [
-                {
-                    "name": "text",
-                    "shape": [1],
-                    "data": [model_input["text"]],
-                    "datatype": "BYTES"
-                },
-                {
-                    "name": "pii_entities",
-                    "shape": [len(model_input["entities"])],
-                    "data": model_input["entities"],
-                    "datatype": "BYTES"
-                }
-            ]
-        }
-        response = self._hub_inference_request(json.dumps(request_body), self.validation_endpoint)
-        return response["outputs"][0]["data"][0]
+    # def _inference_remote(self, model_input: Any) -> Any:
+    #     """Remote inference method for a hosted ML endpoint"""
+    #     request_body = {
+    #         "inputs": [
+    #             {
+    #                 "name": "text",
+    #                 "shape": [1],
+    #                 "data": [model_input["text"]],
+    #                 "datatype": "BYTES"
+    #             },
+    #             {
+    #                 "name": "entities",
+    #                 "shape": [len(model_input["entities"])],
+    #                 "data": model_input["entities"],
+    #                 "datatype": "BYTES"
+    #             }
+    #         ]
+    #     }
+    #     response = self._hub_inference_request(json.dumps(request_body), self.validation_endpoint)
+    #     return response["outputs"][0]["data"][0]
