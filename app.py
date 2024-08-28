@@ -6,6 +6,20 @@ from presidio_anonymizer import AnonymizerEngine
 
 app = FastAPI()
 
+class InferenceData(BaseModel):
+    name: str
+    shape: List[int]
+    data: List
+    datatype: str
+
+class InputRequest(BaseModel):
+    inputs: List[InferenceData]
+
+class OutputResponse(BaseModel):
+    modelname: str
+    modelversion: str
+    outputs: List[InferenceData]
+
 class DetectPII:
     model_name = "presidio-pii"
     validation_method = "sentence"
@@ -68,20 +82,6 @@ PII_ENTITIES_MAP = {
         "US_SSN",
     ],
 }
-
-class InferenceData(BaseModel):
-    name: str
-    shape: List[int]
-    data: List
-    datatype: str
-
-class InputRequest(BaseModel):
-    inputs: List[InferenceData]
-
-class OutputResponse(BaseModel):
-    modelname: str
-    modelversion: str
-    outputs: List[InferenceData]
 
 @app.get("/")
 async def hello_world():
