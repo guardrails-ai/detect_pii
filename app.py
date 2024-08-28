@@ -87,7 +87,7 @@ class DetectPII:
         outputs = []
         for idx, text in enumerate(text_vals):
             anonymized_text = self.get_anonymized_text(text, entities)
-            results = anonymized_text if anonymized_text != text else []
+            results = anonymized_text if anonymized_text != text else text
 
             outputs.append(
                 InferenceData(
