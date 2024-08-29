@@ -99,8 +99,9 @@ class DetectPII(Validator):
             **kwargs,
         )
         self.pii_entities = pii_entities
-        self.pii_analyzer = AnalyzerEngine()
-        self.pii_anonymizer = AnonymizerEngine()
+        if self.use_local:
+            self.pii_analyzer = AnalyzerEngine()
+            self.pii_anonymizer = AnonymizerEngine()
 
     def get_anonymized_text(self, text: str, entities: List[str]) -> str:
         """Analyze and anonymize the text for PII.
