@@ -1,5 +1,130 @@
 [
     {
+        "title": "PII Detection summary",
+        "latency_cpu_sec": 0.015112866163253785,
+        "latency_cpu_stddev": 0.006279933246050932,
+        "latency_gpu_sec": 0.0,
+        "latency_gpu_stddev": 0.0,
+        "tpr_at_default": 0.3846753726953394,
+        "fpr_at_default": null,
+        "f1_at_default": 0.3684591806508944,
+        "auc": null,
+        "roc_points": [
+            {
+                "threshold": 0.0,
+                "tp": 117440,
+                "fp": 217040,
+                "tn": null,
+                "fn": 183315
+            },
+            {
+                "threshold": 0.1,
+                "tp": 97258,
+                "fp": 208072,
+                "tn": null,
+                "fn": 188533
+            },
+            {
+                "threshold": 0.2,
+                "tp": 95003,
+                "fp": 207040,
+                "tn": null,
+                "fn": 188534
+            },
+            {
+                "threshold": 0.30000000000000004,
+                "tp": 89951,
+                "fp": 178336,
+                "tn": null,
+                "fn": 189485
+            },
+            {
+                "threshold": 0.4,
+                "tp": 89951,
+                "fp": 178336,
+                "tn": null,
+                "fn": 189485
+            },
+            {
+                "threshold": 0.5,
+                "tp": 76295,
+                "fp": 173898,
+                "tn": null,
+                "fn": 198542
+            },
+            {
+                "threshold": 0.6000000000000001,
+                "tp": 66226,
+                "fp": 172506,
+                "tn": null,
+                "fn": 207608
+            },
+            {
+                "threshold": 0.7000000000000001,
+                "tp": 64458,
+                "fp": 171090,
+                "tn": null,
+                "fn": 209198
+            },
+            {
+                "threshold": 0.8,
+                "tp": 62267,
+                "fp": 170440,
+                "tn": null,
+                "fn": 211137
+            },
+            {
+                "threshold": 0.9,
+                "tp": 28151,
+                "fp": 1802,
+                "tn": null,
+                "fn": 244131
+            },
+            {
+                "threshold": 1.0,
+                "tp": 15553,
+                "fp": 936,
+                "tn": null,
+                "fn": 256729
+            }
+        ],
+        "latency_curve": [
+            {
+                "input_length_chars": 300,
+                "latency_seconds": 0.013244578915257607,
+                "latency_seconds_stddev": 0.0045928979861094305,
+                "latency_seconds_min": 0.007380008697509766,
+                "latency_seconds_max": 0.04053235054016113
+            },
+            {
+                "input_length_chars": 400,
+                "latency_seconds": 0.016138882196250082,
+                "latency_seconds_stddev": 0.007047551673058059,
+                "latency_seconds_min": 0.008608102798461914,
+                "latency_seconds_max": 0.08211779594421387
+            },
+            {
+                "input_length_chars": 500,
+                "latency_seconds": 0.018314456939697264,
+                "latency_seconds_stddev": 0.002059670780511533,
+                "latency_seconds_min": 0.015318155288696289,
+                "latency_seconds_max": 0.0222628116607666
+            },
+            {
+                "input_length_chars": 200,
+                "latency_seconds": 0.010859754350450303,
+                "latency_seconds_stddev": 0.001481062300675479,
+                "latency_seconds_min": 0.008716106414794922,
+                "latency_seconds_max": 0.01306915283203125
+            }
+        ],
+        "gpu_mem_idle_mb": 0.0,
+        "disk_space_mb": 0.0,
+        "benchmark_cpu": "",
+        "benchmark_gpu": "",
+        "notes": ""
+    },
+    {
         "title": "PII Detection LOCATION",
         "latency_cpu_sec": 0.0,
         "latency_cpu_stddev": 0.0,
@@ -857,131 +982,6 @@
             }
         ],
         "latency_curve": [],
-        "gpu_mem_idle_mb": 0.0,
-        "disk_space_mb": 0.0,
-        "benchmark_cpu": "",
-        "benchmark_gpu": "",
-        "notes": ""
-    },
-    {
-        "title": "PII Detection summary",
-        "latency_cpu_sec": 0.015112866163253785,
-        "latency_cpu_stddev": 0.006279933246050932,
-        "latency_gpu_sec": 0.0,
-        "latency_gpu_stddev": 0.0,
-        "tpr_at_default": 0.3846753726953394,
-        "fpr_at_default": null,
-        "f1_at_default": 0.3684591806508944,
-        "auc": null,
-        "roc_points": [
-            {
-                "threshold": 0.0,
-                "tp": 117440,
-                "fp": 217040,
-                "tn": null,
-                "fn": 183315
-            },
-            {
-                "threshold": 0.1,
-                "tp": 97258,
-                "fp": 208072,
-                "tn": null,
-                "fn": 188533
-            },
-            {
-                "threshold": 0.2,
-                "tp": 95003,
-                "fp": 207040,
-                "tn": null,
-                "fn": 188534
-            },
-            {
-                "threshold": 0.30000000000000004,
-                "tp": 89951,
-                "fp": 178336,
-                "tn": null,
-                "fn": 189485
-            },
-            {
-                "threshold": 0.4,
-                "tp": 89951,
-                "fp": 178336,
-                "tn": null,
-                "fn": 189485
-            },
-            {
-                "threshold": 0.5,
-                "tp": 76295,
-                "fp": 173898,
-                "tn": null,
-                "fn": 198542
-            },
-            {
-                "threshold": 0.6000000000000001,
-                "tp": 66226,
-                "fp": 172506,
-                "tn": null,
-                "fn": 207608
-            },
-            {
-                "threshold": 0.7000000000000001,
-                "tp": 64458,
-                "fp": 171090,
-                "tn": null,
-                "fn": 209198
-            },
-            {
-                "threshold": 0.8,
-                "tp": 62267,
-                "fp": 170440,
-                "tn": null,
-                "fn": 211137
-            },
-            {
-                "threshold": 0.9,
-                "tp": 28151,
-                "fp": 1802,
-                "tn": null,
-                "fn": 244131
-            },
-            {
-                "threshold": 1.0,
-                "tp": 15553,
-                "fp": 936,
-                "tn": null,
-                "fn": 256729
-            }
-        ],
-        "latency_curve": [
-            {
-                "input_length_chars": 300,
-                "latency_seconds": 0.013244578915257607,
-                "latency_seconds_stddev": 0.0045928979861094305,
-                "latency_seconds_min": 0.007380008697509766,
-                "latency_seconds_max": 0.04053235054016113
-            },
-            {
-                "input_length_chars": 400,
-                "latency_seconds": 0.016138882196250082,
-                "latency_seconds_stddev": 0.007047551673058059,
-                "latency_seconds_min": 0.008608102798461914,
-                "latency_seconds_max": 0.08211779594421387
-            },
-            {
-                "input_length_chars": 500,
-                "latency_seconds": 0.018314456939697264,
-                "latency_seconds_stddev": 0.002059670780511533,
-                "latency_seconds_min": 0.015318155288696289,
-                "latency_seconds_max": 0.0222628116607666
-            },
-            {
-                "input_length_chars": 200,
-                "latency_seconds": 0.010859754350450303,
-                "latency_seconds_stddev": 0.001481062300675479,
-                "latency_seconds_min": 0.008716106414794922,
-                "latency_seconds_max": 0.01306915283203125
-            }
-        ],
         "gpu_mem_idle_mb": 0.0,
         "disk_space_mb": 0.0,
         "benchmark_cpu": "",
