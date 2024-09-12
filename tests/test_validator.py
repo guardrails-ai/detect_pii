@@ -4,7 +4,7 @@ from guardrails import Guard
 
 # Setup Guard with DetectPII validator
 guard = Guard().use(
-    DetectPII, ["EMAIL_ADDRESS", "PHONE_NUMBER"], "exception"
+    DetectPII, ["EMAIL_ADDRESS", "PHONE_NUMBER"], "exception", use_local=True,
 )
 
 # Test passing response (no PII)
@@ -18,4 +18,6 @@ def test_pii_fail():
         guard.validate(
             "My email address is demo@lol.com, and my phone number is 1234567890"
         )
+    
+    print(e)
     assert "Validation failed for field with errors:" in str(e.value)
