@@ -1,16 +1,21 @@
+import pytest
+from validator.main import DetectPII
 from guardrails import Guard
-from validator import DetectPII
 
+# Setup Guard with DetectPII validator
+guard = Guard().use(
+    DetectPII, ["EMAIL_ADDRESS", "PHONE_NUMBER"], "exception"
+)
 
-guard = Guard.from_string(validators=[DetectPII(pii_entities="pii", on_fail="fix")])
+# Test passing response (no PII)
+def test_pii_pass():
+    response = guard.validate("My name is John and I love hiking!")
+    assert response.validation_passed is True
 
-def test_validator_success():
-    TEST_OUTPUT = "My email address is , and my phone number is"
-    raw_output, guarded_output, *rest = guard.parse(TEST_OUTPUT)
-    assert guarded_output == TEST_OUTPUT
-
-
-def test_validator_fail():
-  TEST_FAIL_OUTPUT = "My email address is demo@lol.com, and my phone number is 1234567890"
-  raw_output, guarded_output, *rest = guard.parse(TEST_FAIL_OUTPUT)
-  assert(guarded_output == "My email address is <EMAIL_ADDRESS>, and my phone number is <PHONE_NUMBER>")
+# Test failing response (contains PII)
+def test_pii_fail():
+    with pytest.raises(Exception) as e:
+        guard.validate(
+            "My email address is demo@lol.com, and my phone number is 1234567890"
+        )
+    assert "Validation failed for field with errors:" in str(e.value)
