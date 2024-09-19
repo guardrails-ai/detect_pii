@@ -89,7 +89,7 @@ class DetectPII(Validator):
 
     def __init__(
         self,
-        pii_entities: Union[str, List[str], None] = None,
+        pii_entities: Union[str, List[str], None] = "pii",
         on_fail: Union[Callable[..., Any], None] = None,
         **kwargs,
     ):
