@@ -1,6 +1,6 @@
 [project]
 name = "detect_pii"
-version = "0.0.0"
+version = "0.0.1"
 description = "Validates that any text does not contain any PII."
 authors = [
     {name = "Guardrails AI", email = "contact@guardrailsai.com"}
