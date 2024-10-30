@@ -1,0 +1,84 @@
+name: Deploy Inference Apps
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write  
+  contents: read    
+
+jobs:
+  deploy_dev:
+    name: Deploy Inference Apps (Development)
+    runs-on: ubuntu-latest
+    env:
+      ENV: dev
+      AWS_REGION: us-east-1
+      AWS_CI_ROLE: ${{ secrets.AWS_INFER_CI_ROLE__DEV }}
+    steps: 
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_CI_ROLE}}
+
+      - name: Deploy Ray Serve
+        shell: bash
+        run: |
+          RAY_CLUSTER_NAME=ray-cluster-$ENV
+          RAY_PRIVATE_IP=$(aws ec2 describe-instances --region $AWS_DEFAULT_REGION --filters "Name=tag:Name,Values=ray-cluster-$ENV-head" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text)
+          RAY_BASTION_PUBLIC_IP=$(aws ec2 describe-instances --region $AWS_DEFAULT_REGION --filters "Name=tag:Name,Values=ray-cluster-$ENV-bastion" --query "Reservations[*].Instances[*].PublicIpAddress" --output text)
+          RAY_CLUSTER_KEY_PAIR_FILE=$RAY_CLUSTER_NAME
+          RAY_CLUSTER_SECRET_KEY_PAIR_NAME=$RAY_CLUSTER_NAME-key-pair-secret
+
+          aws secretsmanager get-secret-value --region $AWS_REGION --secret-id $RAY_CLUSTER_SECRET_KEY_PAIR_NAME --query SecretString --output text > ./${RAY_CLUSTER_KEY_PAIR_FILE}.pem
+          chmod 400 ./${RAY_CLUSTER_KEY_PAIR_FILE}.pem
+
+          echo "Deploying Ray Serve on $RAY_CLUSTER_NAME..."
+          if ssh -o StrictHostKeyChecking=no -i ./${RAY_CLUSTER_KEY_PAIR_FILE}.pem ubuntu@$RAY_BASTION_PUBLIC_IP "source ~/.profile && bash bastion-ray-serve-deploy.sh $ENV" >/dev/null 2>&1; then
+            echo "Deployment succeeded."
+          else
+            echo "Deployment failed."
+            exit 1
+          fi
+
+  deploy_prod:
+    name: Deploy Inference Apps (Production)
+    runs-on: ubuntu-latest
+    depends-on: deploy_dev
+    env:
+      ENV: prod
+      AWS_REGION: us-east-1
+      AWS_CI_ROLE: ${{ secrets.AWS_INFER_CI_ROLE__PROD }}
+    steps: 
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_CI_ROLE}}
+
+      - name: Deploy Ray Serve
+        shell: bash
+        run: |
+          RAY_CLUSTER_NAME=ray-cluster-$ENV
+          RAY_PRIVATE_IP=$(aws ec2 describe-instances --region $AWS_DEFAULT_REGION --filters "Name=tag:Name,Values=ray-cluster-$ENV-head" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text)
+          RAY_BASTION_PUBLIC_IP=$(aws ec2 describe-instances --region $AWS_DEFAULT_REGION --filters "Name=tag:Name,Values=ray-cluster-$ENV-bastion" --query "Reservations[*].Instances[*].PublicIpAddress" --output text)
+          RAY_CLUSTER_KEY_PAIR_FILE=$RAY_CLUSTER_NAME
+          RAY_CLUSTER_SECRET_KEY_PAIR_NAME=$RAY_CLUSTER_NAME-key-pair-secret
+
+          aws secretsmanager get-secret-value --region $AWS_REGION --secret-id $RAY_CLUSTER_SECRET_KEY_PAIR_NAME --query SecretString --output text > ./${RAY_CLUSTER_KEY_PAIR_FILE}.pem
+          chmod 400 ./${RAY_CLUSTER_KEY_PAIR_FILE}.pem
+
+          echo "Deploying Ray Serve on $RAY_CLUSTER_NAME..."
+          if ssh -o StrictHostKeyChecking=no -i ./${RAY_CLUSTER_KEY_PAIR_FILE}.pem ubuntu@$RAY_BASTION_PUBLIC_IP "source ~/.profile && bash bastion-ray-serve-deploy.sh $ENV" >/dev/null 2>&1; then
+            echo "Deployment succeeded."
+          else
+            echo "Deployment failed."
+            exit 1
+          fi
+    
