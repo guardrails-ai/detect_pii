@@ -219,5 +219,5 @@ class DetectPII(Validator):
                 }
             ]
         }
-        response = self._hub_inference_request(json.dumps(request_body), self.validation_endpoint)
+        response = self._hub_inference_request(json.dumps(request_body), self.validation_endpoint)  # type: ignore
         return response["outputs"][0]["data"][0]
