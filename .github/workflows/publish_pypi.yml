@@ -13,5 +13,5 @@ jobs:
       - name: Build & Deploy
         uses: guardrails-ai/guardrails/.github/actions/validator_pypi_publish@main
         with:
-          guardrails_token: ${{ secrets.GR_GUARDRAILS_TOKEN }}
+          guardrails_token: ${{ secrets.PRIV_PYPI_PUBLISH_TOKEN }}
           validator_id: guardrails/detect_pii
